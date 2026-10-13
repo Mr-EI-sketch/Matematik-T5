@@ -54,6 +54,8 @@ h1 { max-width: 560px; margin: 6px 0 10px; font-size: clamp(2rem, 8vw, 3.25rem);
 .hero p { max-width: 560px; color: #deeee7; margin: 0; }
 .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .pill { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.15); padding: 6px 11px; border-radius: 999px; font-size: .84rem; }
+.audio-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; margin: 12px 2px; }
+.audio-note { align-self: center; color: var(--muted); font-size: .82rem; margin-right: auto; }
 .setup, .scorebar, .mission, .final {
   background: var(--card);
   border: 1px solid var(--line);
@@ -96,6 +98,7 @@ p { margin-top: 0; }
 .score-number { font-size: 1.7rem; font-weight: 900; color: var(--green-dark); font-variant-numeric: tabular-nums; }
 .score-caption { color: var(--muted); font-size: .86rem; }
 .progress-wrap { grid-column: 1 / -1; }
+.timer-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 9px; font-size: .9rem; color: var(--green-dark); }
 .progress-meta { display: flex; justify-content: space-between; gap: 12px; font-size: .88rem; margin-bottom: 7px; }
 .progress-track { height: 11px; border-radius: 999px; background: #e6eee8; overflow: hidden; box-shadow: inset 0 1px 3px rgba(23,58,54,.13); }
 .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #238c72, #86c96c); border-radius: inherit; transition: width .7s cubic-bezier(.2,.8,.2,1); position: relative; overflow: hidden; }
@@ -177,6 +180,15 @@ p { margin-top: 0; }
 .final:not([hidden]) { animation: final-reveal .7s cubic-bezier(.2,.8,.2,1) both; }
 .final h2 { font-size: 1.5rem; }
 .final-score { font-size: 2.3rem; color: var(--green-dark); font-weight: 950; }
+.final-time { display: inline-flex; align-items: center; gap: 8px; padding: 7px 12px; border-radius: 999px; background: #eaf5ec; color: var(--green-dark); font-weight: 850; }
+.leaderboard { margin-top: 18px; padding: 17px; border-radius: 16px; background: #f7faf6; border: 1px solid var(--line); }
+.leaderboard h3 { margin: 0 0 4px; }
+.leaderboard-caption, .leaderboard-status { color: var(--muted); font-size: .88rem; }
+.leaderboard-table-wrap { overflow-x: auto; margin-top: 10px; }
+.leaderboard table { width: 100%; border-collapse: collapse; text-align: left; }
+.leaderboard th, .leaderboard td { padding: 9px 8px; border-bottom: 1px solid var(--line); }
+.leaderboard th { color: var(--green-dark); font-size: .84rem; }
+.leaderboard tr:first-child td { font-weight: 850; color: #8a6410; }
 .report { width: 100%; min-height: 86px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; color: var(--ink); background: #f8faf7; }
 footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20px 8px 0; }
 [hidden] { display: none !important; }
@@ -186,6 +198,8 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   .setup, .scorebar, .mission, .final { border-radius: 16px; }
   .mission { padding: 16px; }
   .scorebar { grid-template-columns: 1fr auto; }
+  .audio-controls { justify-content: stretch; }
+  .audio-controls .btn { flex: 1 1 145px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *:before, *:after { scroll-behavior: auto !important; transition: none !important; }
@@ -206,6 +220,12 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     <div class="pills"><span class="pill">📱 Mesra telefon</span><span class="pill">🌐 Permainan dalam talian</span><span class="pill">💚 Tiada aplikasi berbayar</span></div>
   </header>
 
+  <div class="audio-controls" role="group" aria-label="Kawalan muzik dan kesan bunyi">
+    <span class="audio-note">Audio bermula selepas tekan Mula misi. Boleh ditutup bila-bila masa.</span>
+    <button class="btn btn-soft" id="musicToggle" type="button" aria-pressed="true">🎵 Muzik latar: hidup</button>
+    <button class="btn btn-soft" id="soundToggle" type="button" aria-pressed="true">🔊 Kesan bunyi: hidup</button>
+  </div>
+
   <section class="setup" id="setup">
     <h2>Sedia, Penjaga Taman?</h2>
     <p class="muted">Aktiviti ini dimainkan secara individu. Setiap murid gunakan telefon sendiri dan jawab semua misi berdasarkan pengiraan sendiri.</p>
@@ -217,6 +237,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     </ol>
     <label class="label" for="studentName">Nama murid</label>
     <input class="text-input" id="studentName" maxlength="40" placeholder="Contoh: Aina binti Ahmad" autocomplete="name">
+    <p class="muted" style="font-size:.88rem;margin:8px 0 0">Nama dan masa yang dihantar akan dipaparkan pada ranking kepada sesiapa yang mempunyai pautan permainan.</p>
     <div class="start-row"><button class="btn btn-primary" id="startBtn" type="button">Mula misi →</button></div>
   </section>
 
@@ -227,6 +248,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       <div class="progress-wrap">
         <div class="progress-meta"><span>Kemajuan misi</span><strong id="progressLabel">0 / 6 selesai</strong></div>
         <div class="progress-track" role="progressbar" aria-label="Kemajuan misi" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="timer-meta"><span>⏱ Masa bermain</span><strong id="elapsedTime">00:00</strong></div>
       </div>
     </div>
 
@@ -237,7 +259,16 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       <div class="eyebrow" style="color:var(--green)">Misi selesai</div>
       <h2 id="finalTitle">Taman Ilmu berjaya diselamatkan!</h2>
       <div class="final-score"><span id="finalScore">0</span><span class="score-caption"> / 100 markah</span></div>
+      <p class="final-time">⏱ Masa diambil: <span id="finalDuration">00:00</span></p>
       <p id="rewardText"></p>
+      <section class="leaderboard" id="leaderboard" aria-live="polite">
+        <h3>🏆 Ranking masa kelas</h3>
+        <p class="leaderboard-caption">Masa terpantas di atas. Ranking menunjukkan murid yang telah menghantar keputusan.</p>
+        <p class="leaderboard-status" id="leaderboardStatus">Memuatkan ranking…</p>
+        <div class="leaderboard-table-wrap" id="leaderboardTableWrap" hidden>
+          <table><thead><tr><th>Kedudukan</th><th>Nama murid</th><th>Masa</th></tr></thead><tbody id="leaderboardRows"></tbody></table>
+        </div>
+      </section>
       <label class="label" for="report">Keputusan murid</label>
       <textarea class="report" id="report" readonly></textarea>
       <div class="field-status" id="submitStatus" aria-live="polite"></div>
@@ -262,6 +293,17 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   var submissionDone = false;
   var activeSubmissionId = "";
   var submissionTimeout = null;
+  var gameStartedAt = 0;
+  var gameEndedAt = 0;
+  var elapsedSeconds = 0;
+  var elapsedTimer = null;
+  var audioContext = null;
+  var musicEnabled = true;
+  var soundEnabled = true;
+  var musicTimer = null;
+  var musicStep = 0;
+  var activeRankingId = "";
+  var rankingTimeout = null;
   var levelData = [
     {
       id: "m1", level: "Tahap 1", title: "Pintu Taman Herba", points: 15,
@@ -393,6 +435,86 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     toast.classList.add("show");
     toastTimer = window.setTimeout(function () { toast.classList.remove("show"); }, 3600);
   }
+  function formatDuration(seconds) {
+    var total = Math.max(0, Math.floor(Number(seconds) || 0));
+    var minutes = Math.floor(total / 60);
+    var remaining = total % 60;
+    return (minutes < 10 ? "0" : "") + minutes + ":" + (remaining < 10 ? "0" : "") + remaining;
+  }
+  function updateElapsedTime() {
+    if (!gameStartedAt || gameEndedAt) return;
+    elapsedSeconds = Math.floor((Date.now() - gameStartedAt) / 1000);
+    document.getElementById("elapsedTime").textContent = formatDuration(elapsedSeconds);
+  }
+  function startElapsedTimer() {
+    gameStartedAt = Date.now();
+    gameEndedAt = 0;
+    elapsedSeconds = 0;
+    document.getElementById("elapsedTime").textContent = "00:00";
+    window.clearInterval(elapsedTimer);
+    elapsedTimer = window.setInterval(updateElapsedTime, 1000);
+  }
+  function stopElapsedTimer() {
+    if (!gameEndedAt) gameEndedAt = Date.now();
+    elapsedSeconds = Math.max(0, Math.floor((gameEndedAt - gameStartedAt) / 1000));
+    window.clearInterval(elapsedTimer);
+    document.getElementById("elapsedTime").textContent = formatDuration(elapsedSeconds);
+    document.getElementById("finalDuration").textContent = formatDuration(elapsedSeconds);
+  }
+  function getAudioContext() {
+    var AudioContextType = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextType) return null;
+    if (!audioContext) audioContext = new AudioContextType();
+    if (audioContext.state === "suspended") audioContext.resume().catch(function () {});
+    return audioContext;
+  }
+  function playTone(frequency, duration, type, volume, delay) {
+    if (!audioContext) return;
+    var start = audioContext.currentTime + (delay || 0);
+    var oscillator = audioContext.createOscillator();
+    var gain = audioContext.createGain();
+    oscillator.type = type || "sine";
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(volume || 0.025, start + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(start);
+    oscillator.stop(start + duration + 0.03);
+  }
+  function playSoundEffect(kind) {
+    if (!soundEnabled || !getAudioContext()) return;
+    var notes = kind === "try" ? [392, 311] : kind === "finish" ? [523, 659, 784, 1047] : kind === "success" ? [659, 784, 1047] : kind === "level" ? [523, 659, 784] : [659, 880];
+    notes.forEach(function (note, index) {
+      playTone(note, kind === "try" ? 0.16 : 0.2, kind === "try" ? "triangle" : "sine", kind === "try" ? 0.035 : 0.04, index * 0.095);
+    });
+  }
+  function scheduleMusicNote() {
+    if (!musicEnabled || !audioContext) return;
+    var notes = [523.25, 659.25, 783.99, 659.25, 587.33, 698.46, 880, 698.46];
+    var note = notes[musicStep % notes.length];
+    playTone(note, 0.42, "sine", 0.014, 0);
+    if (musicStep % 4 === 0) playTone(note / 2, 0.56, "triangle", 0.007, 0.01);
+    musicStep += 1;
+  }
+  function startBackgroundMusic() {
+    if (!musicEnabled || !getAudioContext() || musicTimer) return;
+    scheduleMusicNote();
+    musicTimer = window.setInterval(scheduleMusicNote, 680);
+  }
+  function stopBackgroundMusic() {
+    window.clearInterval(musicTimer);
+    musicTimer = null;
+  }
+  function updateAudioButtons() {
+    var musicButton = document.getElementById("musicToggle");
+    var soundButton = document.getElementById("soundToggle");
+    musicButton.textContent = musicEnabled ? "🎵 Muzik latar: hidup" : "🎵 Muzik latar: mati";
+    soundButton.textContent = soundEnabled ? "🔊 Kesan bunyi: hidup" : "🔇 Kesan bunyi: mati";
+    musicButton.setAttribute("aria-pressed", String(musicEnabled));
+    soundButton.setAttribute("aria-pressed", String(soundEnabled));
+  }
   function celebrate() {
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     var layer = document.getElementById("fxLayer");
@@ -443,6 +565,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     updateScore();
     if (score > priorScore) animateScore();
     if (allCorrect) {
+      if (!wasDone) playSoundEffect(id === "bonus" ? "finish" : "level");
       var result = document.getElementById("result-" + id);
       result.textContent = level.explanation ? "Tepat! " + level.explanation : "Misi selesai! Keping peta diperoleh. Teruskan ke cabaran seterusnya.";
       result.hidden = false;
@@ -460,8 +583,10 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       }
       if (id === "bonus" && !wasDone) finishGame();
     } else if (score > priorScore) {
+      playSoundEffect("correct");
       showToast("Ada jawapan yang tepat! Semak bahagian lain dan cuba lagi ✨", "success");
     } else {
+      playSoundEffect("try");
       showToast("Belum tepat lagi. Buka petunjuk dan cuba semula 💡", "try");
     }
   }
@@ -482,6 +607,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   }
   function finishGame() {
     var final = document.getElementById("final");
+    stopElapsedTimer();
     final.hidden = false;
     celebrate();
     document.getElementById("finalScore").textContent = score;
@@ -491,10 +617,11 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     makeReport(tier);
     document.getElementById("submitStatus").textContent = "Tekan butang sekali untuk merekod markah dan menyimpan gambar ringkasan jawapan kepada guru.";
     showToast("Taman Ilmu berjaya diselamatkan, " + student + "! 🏅", "success");
+    loadLeaderboard();
     final.scrollIntoView({behavior:"smooth", block:"start"});
   }
   function makeReport(tier) {
-    var report = student + " — Operasi Selamatkan Taman Ilmu\nMarkah: " + score + "/100\nGanjaran: " + tier + "\nMisi luas bentuk gabungan selesai.";
+    var report = student + " — Operasi Selamatkan Taman Ilmu\nMarkah: " + score + "/100\nMasa: " + formatDuration(elapsedSeconds) + "\nGanjaran: " + tier + "\nMisi luas bentuk gabungan selesai.";
     document.getElementById("report").value = report;
   }
   function collectAnswerCards() {
@@ -558,6 +685,8 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     context.fillText("Murid: " + student, 72, 165);
     context.font = "bold 52px system-ui, sans-serif";
     context.fillText("Markah: " + score + "/100", 72, 235);
+    context.font = "bold 28px system-ui, sans-serif";
+    context.fillText("Masa: " + formatDuration(elapsedSeconds), 690, 230);
     context.font = "bold 24px system-ui, sans-serif";
     context.fillText("Ganjaran: " + tier, 72, 275);
     var y = 338;
@@ -586,6 +715,55 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     var status = document.getElementById("submitStatus");
     status.textContent = message;
     status.className = "field-status " + (good ? "good" : "try");
+  }
+  function getLeaderboardFrame() {
+    var frame = document.getElementById("leaderboardFrame");
+    if (!frame) {
+      frame = document.createElement("iframe");
+      frame.id = "leaderboardFrame";
+      frame.title = "Penerima ranking masa kelas";
+      frame.className = "iframe-sink";
+      frame.setAttribute("aria-hidden", "true");
+      document.body.appendChild(frame);
+    }
+    return frame;
+  }
+  function renderLeaderboard(items) {
+    var status = document.getElementById("leaderboardStatus");
+    var wrap = document.getElementById("leaderboardTableWrap");
+    var body = document.getElementById("leaderboardRows");
+    body.replaceChildren();
+    if (!items || !items.length) {
+      wrap.hidden = true;
+      status.textContent = "Belum ada murid menghantar keputusan. Ranking akan muncul selepas penghantaran pertama.";
+      return;
+    }
+    items.forEach(function (item, index) {
+      var row = document.createElement("tr");
+      var rank = document.createElement("td");
+      var name = document.createElement("td");
+      var duration = document.createElement("td");
+      rank.textContent = index === 0 ? "🥇 1" : index === 1 ? "🥈 2" : index === 2 ? "🥉 3" : String(index + 1);
+      name.textContent = item.name;
+      duration.textContent = formatDuration(item.durationSeconds);
+      row.appendChild(rank);
+      row.appendChild(name);
+      row.appendChild(duration);
+      body.appendChild(row);
+    });
+    status.textContent = "Ranking semasa · " + items.length + " murid telah menghantar keputusan.";
+    wrap.hidden = false;
+  }
+  function loadLeaderboard() {
+    var status = document.getElementById("leaderboardStatus");
+    var frame = getLeaderboardFrame();
+    activeRankingId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : "ranking-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    status.textContent = "Memuatkan ranking terkini…";
+    window.clearTimeout(rankingTimeout);
+    rankingTimeout = window.setTimeout(function () {
+      if (activeRankingId) status.textContent = "Ranking belum dapat dimuatkan. Tekan Hantar keputusan dahulu atau cuba muat semula halaman.";
+    }, 15000);
+    frame.src = AUTO_SUBMIT_ENDPOINT + "?action=leaderboard&requestId=" + encodeURIComponent(activeRankingId) + "&t=" + Date.now();
   }
   function getSubmissionFrame() {
     var frame = document.getElementById("autoSubmitFrame");
@@ -619,6 +797,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       studentName: student,
       score: String(score),
       reward: tier,
+      durationSeconds: String(elapsedSeconds),
       resultImage: makeResultImage(tier)
     };
     var form = document.createElement("form");
@@ -653,7 +832,18 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   window.addEventListener("message", function (event) {
     var frame = document.getElementById("autoSubmitFrame");
     var data = event.data;
-    if (!frame || !data || data.type !== "taman-ilmu-result" || data.requestId !== activeSubmissionId) return;
+    if (!data) return;
+    if (data.type === "taman-ilmu-ranking" && data.requestId === activeRankingId) {
+      window.clearTimeout(rankingTimeout);
+      activeRankingId = "";
+      if (data.ok) renderLeaderboard(data.items || []);
+      else {
+        document.getElementById("leaderboardTableWrap").hidden = true;
+        document.getElementById("leaderboardStatus").textContent = data.message || "Ranking tidak dapat dimuatkan. Cuba semula sebentar lagi.";
+      }
+      return;
+    }
+    if (!frame || data.type !== "taman-ilmu-result" || data.requestId !== activeSubmissionId) return;
     window.clearTimeout(submissionTimeout);
     submissionPending = false;
     var button = document.getElementById("sendResultBtn");
@@ -663,16 +853,26 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       button.textContent = "Berjaya dihantar ✓";
       setSubmissionStatus("Berjaya dihantar! Markah dan gambar ringkasan jawapan sudah direkodkan untuk guru.", true);
       showToast("Berjaya dihantar, " + student + "! ✅", "success");
+      playSoundEffect("success");
+      loadLeaderboard();
     } else {
       button.disabled = false;
       button.textContent = "Cuba hantar semula";
       setSubmissionStatus(data.message || "Penghantaran gagal. Cuba semula atau maklumkan guru.", false);
       showToast("Penghantaran gagal. Cuba sekali lagi.", "try");
+      playSoundEffect("try");
     }
   });
   document.getElementById("startBtn").addEventListener("click", function () {
     var field = document.getElementById("studentName");
-    student = field.value.trim() || "Murid 5 Inovatif";
+    student = field.value.trim();
+    if (!student) {
+      showToast("Isi nama dahulu untuk masuk ke ranking kelas. ✍️", "try");
+      field.focus();
+      return;
+    }
+    startElapsedTimer();
+    if (musicEnabled) startBackgroundMusic();
     document.getElementById("studentDisplay").textContent = student;
     document.getElementById("setup").hidden = true;
     document.getElementById("game").hidden = false;
@@ -708,6 +908,18 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     status.className = "field-status good";
   });
   document.getElementById("sendResultBtn").addEventListener("click", sendResult);
+  document.getElementById("musicToggle").addEventListener("click", function () {
+    musicEnabled = !musicEnabled;
+    updateAudioButtons();
+    if (musicEnabled) startBackgroundMusic();
+    else stopBackgroundMusic();
+  });
+  document.getElementById("soundToggle").addEventListener("click", function () {
+    soundEnabled = !soundEnabled;
+    updateAudioButtons();
+    if (soundEnabled) playSoundEffect("correct");
+  });
+  updateAudioButtons();
   document.getElementById("resetBtn").addEventListener("click", function () {
     window.location.reload();
   });
