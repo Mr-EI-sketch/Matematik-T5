@@ -46,7 +46,7 @@ button { touch-action: manipulation; }
   position: relative;
   overflow: hidden;
 }
-.hero:after { content: "✦"; position: absolute; right: 22px; top: 5px; color: var(--yellow); font-size: 88px; opacity: .22; transform: rotate(12deg); }
+.hero:after { content: "✦"; position: absolute; right: 22px; top: 5px; color: var(--yellow); font-size: 88px; opacity: .22; transform: rotate(12deg); animation: twinkle 3.5s ease-in-out infinite; }
 .eyebrow { text-transform: uppercase; font-size: .76rem; font-weight: 800; letter-spacing: .12em; color: #b9e1d2; }
 h1 { max-width: 560px; margin: 6px 0 10px; font-size: clamp(2rem, 8vw, 3.25rem); line-height: 1.04; letter-spacing: -.04em; }
 .hero p { max-width: 560px; color: #deeee7; margin: 0; }
@@ -80,7 +80,10 @@ p { margin-top: 0; }
   padding: 11px 16px;
   font-weight: 800;
   cursor: pointer;
+  transition: transform .16s ease, background-color .16s ease, box-shadow .16s ease;
 }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(23,58,54,.12); }
+.btn:active { transform: scale(.98); }
 .btn-primary { background: var(--green); color: white; }
 .btn-primary:hover { background: var(--green-dark); }
 .btn-soft { background: var(--mint); color: var(--green-dark); }
@@ -100,15 +103,18 @@ p { margin-top: 0; }
 .mission { padding: 19px; }
 .mission.locked { opacity: .62; }
 .mission.locked { pointer-events: none; }
+.mission:not(.locked) { animation: card-enter .45s cubic-bezier(.2,.8,.2,1) both; }
 .mission.done { border-color: #83c5a7; }
+.mission.done { animation: card-done .65s ease-out both; }
 .mission-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .leveltag { font-size: .77rem; color: var(--green-dark); font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
 .mission h3 { margin: 3px 0 5px; font-size: 1.2rem; line-height: 1.25; }
 .points { flex: none; background: #fff3cf; color: #70500c; border-radius: 999px; padding: 5px 10px; font-weight: 850; font-size: .82rem; }
 .mission-copy { color: #314f49; margin: 11px 0 12px; }
-.diagram { margin: 4px 0 12px; width: 100%; max-width: 340px; height: auto; border-radius: 12px; background: #f5faf6; }
+.diagram { margin: 4px 0 12px; width: 100%; max-width: 400px; height: auto; border-radius: 12px; background: #f5faf6; }
 .diagram text { font-family: system-ui, sans-serif; fill: #173a36; font-size: 12px; font-weight: 700; }
 .hint { background: #fff8e5; border-left: 4px solid var(--yellow); border-radius: 8px; padding: 10px 12px; margin: 11px 0; color: #554516; }
+.hint:not([hidden]) { animation: result-in .3s ease-out both; }
 .fields { display: grid; gap: 11px; margin-top: 14px; }
 .field { padding-top: 10px; border-top: 1px solid #edf1ed; }
 .field-label { display: block; font-weight: 750; margin-bottom: 6px; }
@@ -127,7 +133,23 @@ p { margin-top: 0; }
 .field-status.try { color: var(--bad); }
 .mission-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
 .mission-actions .btn { flex: 1 1 135px; }
-.result-line { font-weight: 850; color: var(--good); margin-top: 12px; }
+.result-line { font-weight: 750; color: var(--good); background: #edf8f0; border-radius: 12px; padding: 12px; margin-top: 12px; }
+.result-line:not([hidden]) { animation: result-in .35s ease-out both; }
+.score-number.bump { animation: score-bump .45s ease-out; }
+.toast {
+  position: fixed; z-index: 10; top: 14px; left: 50%; width: min(92vw, 520px);
+  padding: 12px 18px; border-radius: 999px; background: var(--ink); color: white;
+  box-shadow: 0 10px 28px rgba(23,58,54,.24); text-align: center; font-weight: 850;
+  opacity: 0; transform: translate(-50%, -12px) scale(.96); pointer-events: none;
+}
+.toast.show { animation: toast-pop 3.6s ease both; }
+ .toast.try { background: #72530d; }
+@keyframes twinkle { 0%, 100% { opacity: .16; transform: rotate(12deg) scale(.96); } 50% { opacity: .34; transform: rotate(20deg) scale(1.04); } }
+@keyframes card-enter { 0% { opacity: 0; transform: translateY(12px) scale(.985); } 75% { opacity: 1; transform: translateY(-2px) scale(1.005); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes card-done { 0% { box-shadow: var(--shadow); } 35% { transform: scale(1.012); box-shadow: 0 0 0 5px rgba(131,197,167,.22), var(--shadow); } 100% { transform: scale(1); box-shadow: var(--shadow); } }
+@keyframes score-bump { 0%, 100% { transform: scale(1); } 45% { transform: scale(1.22); color: #ba5834; } }
+@keyframes result-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toast-pop { 0% { opacity: 0; transform: translate(-50%, -12px) scale(.96); } 10%, 84% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -8px) scale(.98); } }
 .final { padding: 21px; margin-top: 14px; }
 .final h2 { font-size: 1.5rem; }
 .final-score { font-size: 2.3rem; color: var(--green-dark); font-weight: 950; }
@@ -141,10 +163,15 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   .mission { padding: 16px; }
   .scorebar { grid-template-columns: 1fr auto; }
 }
-@media (prefers-reduced-motion: reduce) { *, *:before, *:after { scroll-behavior: auto !important; transition: none !important; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *:before, *:after { scroll-behavior: auto !important; transition: none !important; }
+  .hero:after, .mission:not(.locked), .mission.done, .result-line:not([hidden]), .hint:not([hidden]), .score-number.bump { animation: none !important; }
+  .toast.show { animation: none !important; opacity: 1; transform: translate(-50%, 0); }
+}
 </style>
 </head>
 <body>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 <div class="shell">
   <div class="topline"><span class="mark" aria-hidden="true">🌱</span><span>MATEMATIK · TAHUN 5</span></div>
   <header class="hero">
@@ -204,6 +231,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   var score = 0;
   var student = "";
   var completed = {};
+  var toastTimer = null;
   var levelData = [
     {
       id: "m1", level: "Tahap 1", title: "Pintu Taman Herba", points: 15,
@@ -256,10 +284,12 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     },
     {
       id: "secret", level: "Cabaran Rahsia", title: "Detektif Kesilapan", points: 5,
-      story: "Amir mengira luas bentuk L Tahap 2 begini: (10 − 4) × (8 − 3) = 30 m². Adakah cara itu memberikan luas seluruh bentuk L?",
-      hint: "Lakaran bentuk L masih mempunyai bahagian bawah dan jalur di sebelah kiri. Bandingkan luas bentuk besar dengan luas potongan.",
+      story: "Amir mengira luas bentuk L begini: (10 − 4) × (8 − 3) = 30 m². Lihat kawasan oren dalam gambar. Adakah 30 m² itu luas seluruh bentuk L?",
+      hint: "30 m² ialah kawasan oren sahaja. Kira segi empat tepat penuh 10 × 8, kemudian tolak bahagian kosong 4 × 3.",
+      explanation: "Kiraan Amir, 6 × 5 = 30 m², hanya meliputi kawasan oren. Luas seluruh bentuk L ialah luas segi empat tepat penuh tolak bahagian kosong: (10 × 8) − (4 × 3) = 80 − 12 = 68 m².",
+      diagram: '<svg class="diagram" viewBox="0 0 360 275" role="img" aria-label="Bentuk L berukuran keseluruhan 10 meter kali 8 meter. Ruang kosong di penjuru kanan atas berukuran 4 kali 3 meter. Kawasan oren 6 kali 5 meter ialah bahagian yang Amir kira sahaja; bahagian hijau dan kuning yang lain turut menjadi sebahagian bentuk L."><rect x="55" y="35" width="150" height="200" fill="#ccebdc"/><rect x="55" y="110" width="150" height="125" fill="#f6b39a"/><rect x="205" y="110" width="100" height="125" fill="#ffe6a6"/><rect x="205" y="35" width="100" height="75" rx="5" fill="#fff8e5" stroke="#c28a18" stroke-width="2" stroke-dasharray="6 5"/><path d="M55 35 H205 V110 H305 V235 H55 Z" fill="none" stroke="#36896f" stroke-width="4" stroke-linejoin="round"/><line x1="55" y1="110" x2="205" y2="110" stroke="#c56b4e" stroke-width="2" stroke-dasharray="5 4"/><text x="156" y="24" text-anchor="middle">Keseluruhan 10 m</text><text x="23" y="142" text-anchor="middle" transform="rotate(-90 23 142)">Keseluruhan 8 m</text><text x="130" y="73" text-anchor="middle">Bahagian hijau</text><text x="130" y="91" text-anchor="middle">6 × 3 = 18 m²</text><text x="130" y="153" text-anchor="middle">Amir kira (oren)</text><text x="130" y="177" text-anchor="middle">6 × 5 = 30 m²</text><text x="255" y="157" text-anchor="middle">Bahagian kuning</text><text x="255" y="177" text-anchor="middle">4 × 5 = 20 m²</text><text x="255" y="63" text-anchor="middle">Ruang kosong</text><text x="255" y="83" text-anchor="middle">4 × 3 = 12 m²</text></svg>',
       fields: [
-        {id:"reason", label:"Pilih penerangan yang tepat", kind:"choice", points:3, expected:"partial", options:[["Tidak. Kiraan itu hanya mendapat satu segi empat tepat kecil; cara yang betul ialah tolak luas potongan daripada bentuk besar.","partial"],["Ya. Tolak ukuran sisi dahulu untuk semua bentuk L.","yes"],["Tidak. Unitnya perlu ditukar daripada m² kepada m.","unit"]]},
+        {id:"reason", label:"Pilih penerangan yang tepat", kind:"choice", points:3, expected:"partial", options:[["Tidak. 6 × 5 = 30 m² hanya kawasan oren. Luas penuh ialah (10 × 8) − (4 × 3) = 68 m².","partial"],["Ya. 6 × 5 merangkumi semua bahagian bentuk L.","yes"],["Tidak. Tambah ukuran sisi: 10 + 8 − 4 − 3 = 11 m².","unit"]]},
         {id:"answer", label:"Luas seluruh bentuk L (m²)", kind:"number", points:2, expected:68}
       ]
     },
@@ -295,7 +325,6 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     return html;
   }
   function renderLevel(level, index) {
-    var secret = level.id === "secret";
     var fields = level.fields.map(function (field) { return renderField(level, field); }).join("");
     return '<article class="mission locked" id="card-' + level.id + '" data-index="' + index + '">' +
       '<div class="mission-head"><div><div class="leveltag">' + escapeHtml(level.level) + '</div><h3>' + escapeHtml(level.title) + '</h3></div><span class="points">' + level.points + ' markah</span></div>' +
@@ -325,10 +354,28 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     node.textContent = message;
     node.className = "field-status " + (good ? "good" : "try");
   }
+  function showToast(message, tone) {
+    var toast = document.getElementById("toast");
+    window.clearTimeout(toastTimer);
+    toast.textContent = message;
+    toast.className = "toast" + (tone ? " " + tone : "");
+    void toast.offsetWidth;
+    toast.classList.add("show");
+    toastTimer = window.setTimeout(function () { toast.classList.remove("show"); }, 3600);
+  }
+  function animateScore() {
+    var scoreBox = document.querySelector(".score-number");
+    scoreBox.classList.remove("bump");
+    void scoreBox.offsetWidth;
+    scoreBox.classList.add("bump");
+    window.setTimeout(function () { scoreBox.classList.remove("bump"); }, 500);
+  }
   function checkLevel(id) {
     var level = getLevel(id);
     var card = document.getElementById("card-" + id);
     if (!level || card.classList.contains("locked")) return;
+    var priorScore = score;
+    var wasDone = card.classList.contains("done");
     var allCorrect = true;
     level.fields.forEach(function (field) {
       var value = getFieldValue(level, field);
@@ -348,16 +395,27 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       }
     });
     updateScore();
+    if (score > priorScore) animateScore();
     if (allCorrect) {
       var result = document.getElementById("result-" + id);
-      result.textContent = "Misi selesai! Keping peta diperoleh. Teruskan ke cabaran seterusnya.";
+      result.textContent = level.explanation ? "Tepat! " + level.explanation : "Misi selesai! Keping peta diperoleh. Teruskan ke cabaran seterusnya.";
       result.hidden = false;
-      card.classList.add("done");
-      var nextIndex = Number(card.getAttribute("data-index")) + 1;
-      if (nextIndex < levelData.length) {
-        document.getElementById("card-" + levelData[nextIndex].id).classList.remove("locked");
+      if (!wasDone) {
+        card.classList.add("done");
+        var nextIndex = Number(card.getAttribute("data-index")) + 1;
+        if (nextIndex < levelData.length) {
+          var nextLevel = levelData[nextIndex];
+          document.getElementById("card-" + nextLevel.id).classList.remove("locked");
+          showToast("Tahap selesai! " + nextLevel.level + " dibuka 🔓 +" + level.points + " markah", "success");
+        } else {
+          showToast("Semua misi selesai! Ganjaran sedang disediakan 🏆", "success");
+        }
       }
-      if (id === "bonus") finishGame();
+      if (id === "bonus" && !wasDone) finishGame();
+    } else if (score > priorScore) {
+      showToast("Ada jawapan yang tepat! Semak bahagian lain dan cuba lagi ✨", "success");
+    } else {
+      showToast("Belum tepat lagi. Buka petunjuk dan cuba semula 💡", "try");
     }
   }
   function updateScore() {
@@ -384,6 +442,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     document.getElementById("rewardText").textContent = "Ganjaran individu: " + tier + ". Setiap pembetulan membawa kemajuan—syabas kerana mencuba semua misi!";
     makeReport(tier);
     submitResult(tier);
+    showToast("Taman Ilmu berjaya diselamatkan, " + student + "! 🏅", "success");
     final.scrollIntoView({behavior:"smooth", block:"start"});
   }
   function makeReport(tier) {
@@ -409,6 +468,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     document.getElementById("setup").hidden = true;
     document.getElementById("game").hidden = false;
     document.getElementById("card-m1").classList.remove("locked");
+    showToast("Operasi bermula, " + student + "! 🌱", "success");
     document.getElementById("card-m1").scrollIntoView({behavior:"smooth", block:"start"});
   });
   document.getElementById("studentName").addEventListener("keydown", function (event) {
@@ -422,6 +482,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       var panel = document.getElementById("hint-" + hint.getAttribute("data-hint"));
       panel.hidden = !panel.hidden;
       hint.textContent = panel.hidden ? "Minta petunjuk" : "Tutup petunjuk";
+      if (!panel.hidden) showToast("Petunjuk dibuka. Gunakannya untuk fikir semula 💡");
     }
   });
   document.getElementById("shareBtn").addEventListener("click", async function () {
