@@ -36,8 +36,9 @@ button, input { font: inherit; }
 button { touch-action: manipulation; }
 .shell { width: min(100% - 28px, 760px); margin: 0 auto; padding: 22px 0 48px; }
 .topline { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; color: var(--green-dark); font-weight: 800; letter-spacing: .03em; }
-.mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; background: var(--green); color: white; font-size: 21px; }
+.mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; background: var(--green); color: white; font-size: 21px; animation: seed-bounce 3s ease-in-out infinite; }
 .hero {
+  animation: hero-arrive .7s cubic-bezier(.2,.8,.2,1) both;
   background: var(--ink);
   color: #fff;
   border-radius: 26px;
@@ -46,6 +47,7 @@ button { touch-action: manipulation; }
   position: relative;
   overflow: hidden;
 }
+.hero:before { content: "🌿"; position: absolute; right: 76px; bottom: 18px; font-size: 46px; opacity: .2; animation: leaf-float 4s ease-in-out infinite; }
 .hero:after { content: "✦"; position: absolute; right: 22px; top: 5px; color: var(--yellow); font-size: 88px; opacity: .22; transform: rotate(12deg); animation: twinkle 3.5s ease-in-out infinite; }
 .eyebrow { text-transform: uppercase; font-size: .76rem; font-weight: 800; letter-spacing: .12em; color: #b9e1d2; }
 h1 { max-width: 560px; margin: 6px 0 10px; font-size: clamp(2rem, 8vw, 3.25rem); line-height: 1.04; letter-spacing: -.04em; }
@@ -90,28 +92,32 @@ p { margin-top: 0; }
 .btn-soft:hover { background: #cbeadd; }
 .start-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 .start-row .btn { flex: 1 1 170px; }
-.scorebar { margin-top: 16px; padding: 16px 18px; display: grid; grid-template-columns: 1fr auto; gap: 10px 16px; align-items: center; }
+.scorebar { animation: hud-arrive .6s .15s both; margin-top: 16px; padding: 16px 18px; display: grid; grid-template-columns: 1fr auto; gap: 10px 16px; align-items: center; }
 .score-number { font-size: 1.7rem; font-weight: 900; color: var(--green-dark); font-variant-numeric: tabular-nums; }
 .score-caption { color: var(--muted); font-size: .86rem; }
 .progress-wrap { grid-column: 1 / -1; }
 .progress-meta { display: flex; justify-content: space-between; gap: 12px; font-size: .88rem; margin-bottom: 7px; }
-.progress-track { height: 11px; border-radius: 999px; background: #e6eee8; overflow: hidden; }
-.progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #238c72, #86c96c); border-radius: inherit; transition: width .3s ease; }
+.progress-track { height: 11px; border-radius: 999px; background: #e6eee8; overflow: hidden; box-shadow: inset 0 1px 3px rgba(23,58,54,.13); }
+.progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #238c72, #86c96c); border-radius: inherit; transition: width .7s cubic-bezier(.2,.8,.2,1); position: relative; overflow: hidden; }
+.progress-fill:after { content: ""; position: absolute; inset: 0; width: 42%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.58), transparent); animation: progress-shine 2.4s ease-in-out infinite; }
 .section-title { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin: 25px 2px 12px; }
 .section-title h2 { margin: 0; font-size: 1.35rem; }
 .mission-list { display: grid; gap: 13px; }
-.mission { padding: 19px; }
+.mission { padding: 19px; position: relative; transition: transform .25s ease, box-shadow .25s ease; }
+.mission:not(.locked):not(.done):hover { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(23,58,54,.13); }
 .mission.locked { opacity: .62; }
 .mission.locked { pointer-events: none; }
 .mission:not(.locked) { animation: card-enter .45s cubic-bezier(.2,.8,.2,1) both; }
-.mission.done { border-color: #83c5a7; }
+.mission.done { border-color: #83c5a7; background: linear-gradient(135deg, #fff 0%, #f1faf4 100%); }
+.mission.done .leveltag:after { content: "  ✓"; color: var(--good); animation: stamp-pop .45s cubic-bezier(.2,.8,.2,1) both; }
+.mission.done .points { animation: reward-pulse 1.8s ease-in-out infinite; }
 .mission.done { animation: card-done .65s ease-out both; }
 .mission-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .leveltag { font-size: .77rem; color: var(--green-dark); font-weight: 850; text-transform: uppercase; letter-spacing: .08em; }
 .mission h3 { margin: 3px 0 5px; font-size: 1.2rem; line-height: 1.25; }
 .points { flex: none; background: #fff3cf; color: #70500c; border-radius: 999px; padding: 5px 10px; font-weight: 850; font-size: .82rem; }
 .mission-copy { color: #314f49; margin: 11px 0 12px; }
-.diagram { margin: 4px 0 12px; width: 100%; max-width: 400px; height: auto; border-radius: 12px; background: #f5faf6; }
+.diagram { margin: 4px 0 12px; width: 100%; max-width: 400px; height: auto; border-radius: 12px; background: #f5faf6; animation: diagram-float 4.5s ease-in-out infinite; }
 .diagram text { font-family: system-ui, sans-serif; fill: #173a36; font-size: 12px; font-weight: 700; }
 .hint { background: #fff8e5; border-left: 4px solid var(--yellow); border-radius: 8px; padding: 10px 12px; margin: 11px 0; color: #554516; }
 .hint:not([hidden]) { animation: result-in .3s ease-out both; }
@@ -125,6 +131,8 @@ p { margin-top: 0; }
 }
 .option:has(input:checked) { border-color: #5aab87; background: #f1faf4; }
 .option input { margin-top: 4px; accent-color: var(--green); width: 18px; height: 18px; flex: none; }
+.option:hover { transform: translateX(3px); border-color: #83c5a7; }
+.option:has(input:checked) { animation: option-select .25s ease-out both; }
 .answer-row { display: flex; align-items: center; gap: 9px; }
 .number-input { max-width: 180px; }
 .unit-mark { font-weight: 800; color: var(--muted); }
@@ -142,8 +150,22 @@ p { margin-top: 0; }
   box-shadow: 0 10px 28px rgba(23,58,54,.24); text-align: center; font-weight: 850;
   opacity: 0; transform: translate(-50%, -12px) scale(.96); pointer-events: none;
 }
-.toast.show { animation: toast-pop 3.6s ease both; }
+.toast.show { animation: toast-pop 3.6s cubic-bezier(.2,.8,.2,1) both; }
+.toast.success { background: linear-gradient(120deg, #13574d, #238c72); box-shadow: 0 12px 34px rgba(19,87,77,.34); }
  .toast.try { background: #72530d; }
+.fx-layer { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 9; }
+.confetti-piece { position: absolute; top: -18px; width: var(--piece-size); height: calc(var(--piece-size) * 1.5); border-radius: 2px; animation: confetti-fall var(--fall-time) cubic-bezier(.2,.65,.5,1) both; }
+@keyframes hero-arrive { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes seed-bounce { 0%, 100% { transform: rotate(-5deg) translateY(0); } 50% { transform: rotate(5deg) translateY(-4px); } }
+@keyframes leaf-float { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-10px) rotate(8deg); } }
+@keyframes hud-arrive { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes progress-shine { 0% { transform: translateX(-130%); } 70%, 100% { transform: translateX(260%); } }
+@keyframes diagram-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+@keyframes option-select { 0% { transform: scale(.985); } 75% { transform: scale(1.012); } 100% { transform: scale(1); } }
+@keyframes stamp-pop { 0% { opacity: 0; transform: scale(.5) rotate(-18deg); } 75% { opacity: 1; transform: scale(1.2) rotate(6deg); } 100% { opacity: 1; transform: scale(1) rotate(0); } }
+@keyframes reward-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(244,201,93,0); } 50% { box-shadow: 0 0 0 5px rgba(244,201,93,.28); } }
+@keyframes final-reveal { 0% { opacity: 0; transform: translateY(18px) scale(.97); } 70% { opacity: 1; transform: translateY(-3px) scale(1.01); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes confetti-fall { 0% { opacity: 0; transform: translateY(-3vh) rotate(0deg); } 12% { opacity: 1; } 100% { opacity: 0; transform: translateY(110vh) rotate(760deg); } }
 @keyframes twinkle { 0%, 100% { opacity: .16; transform: rotate(12deg) scale(.96); } 50% { opacity: .34; transform: rotate(20deg) scale(1.04); } }
 @keyframes card-enter { 0% { opacity: 0; transform: translateY(12px) scale(.985); } 75% { opacity: 1; transform: translateY(-2px) scale(1.005); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes card-done { 0% { box-shadow: var(--shadow); } 35% { transform: scale(1.012); box-shadow: 0 0 0 5px rgba(131,197,167,.22), var(--shadow); } 100% { transform: scale(1); box-shadow: var(--shadow); } }
@@ -151,6 +173,7 @@ p { margin-top: 0; }
 @keyframes result-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes toast-pop { 0% { opacity: 0; transform: translate(-50%, -12px) scale(.96); } 10%, 84% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -8px) scale(.98); } }
 .final { padding: 21px; margin-top: 14px; }
+.final:not([hidden]) { animation: final-reveal .7s cubic-bezier(.2,.8,.2,1) both; }
 .final h2 { font-size: 1.5rem; }
 .final-score { font-size: 2.3rem; color: var(--green-dark); font-weight: 950; }
 .report { width: 100%; min-height: 86px; padding: 10px; border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; color: var(--ink); background: #f8faf7; }
@@ -165,13 +188,14 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
 }
 @media (prefers-reduced-motion: reduce) {
   *, *:before, *:after { scroll-behavior: auto !important; transition: none !important; }
-  .hero:after, .mission:not(.locked), .mission.done, .result-line:not([hidden]), .hint:not([hidden]), .score-number.bump { animation: none !important; }
+  .hero:before, .hero:after, .mark, .scorebar, .diagram, .mission:not(.locked), .mission.done, .result-line:not([hidden]), .hint:not([hidden]), .score-number.bump, .final:not([hidden]), .progress-fill:after { animation: none !important; }
   .toast.show { animation: none !important; opacity: 1; transform: translate(-50%, 0); }
 }
 </style>
 </head>
 <body>
 <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<div class="fx-layer" id="fxLayer" aria-hidden="true"></div>
 <div class="shell">
   <div class="topline"><span class="mark" aria-hidden="true">🌱</span><span>MATEMATIK · TAHUN 5</span></div>
   <header class="hero">
@@ -363,6 +387,22 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     toast.classList.add("show");
     toastTimer = window.setTimeout(function () { toast.classList.remove("show"); }, 3600);
   }
+  function celebrate() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var layer = document.getElementById("fxLayer");
+    var colors = ["#f4c95d", "#83c5a7", "#5eafd0", "#f39a72", "#a78bfa"];
+    for (var i = 0; i < 38; i++) {
+      var piece = document.createElement("span");
+      piece.className = "confetti-piece";
+      piece.style.left = Math.random() * 100 + "vw";
+      piece.style.backgroundColor = colors[i % colors.length];
+      piece.style.setProperty("--piece-size", (6 + Math.random() * 7) + "px");
+      piece.style.setProperty("--fall-time", (1.5 + Math.random() * 1.2) + "s");
+      piece.style.animationDelay = (Math.random() * .45) + "s";
+      layer.appendChild(piece);
+      window.setTimeout(function (node) { return function () { node.remove(); }; }(piece), 3200);
+    }
+  }
   function animateScore() {
     var scoreBox = document.querySelector(".score-number");
     scoreBox.classList.remove("bump");
@@ -402,6 +442,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       result.hidden = false;
       if (!wasDone) {
         card.classList.add("done");
+        celebrate();
         var nextIndex = Number(card.getAttribute("data-index")) + 1;
         if (nextIndex < levelData.length) {
           var nextLevel = levelData[nextIndex];
@@ -436,6 +477,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   function finishGame() {
     var final = document.getElementById("final");
     final.hidden = false;
+    celebrate();
     document.getElementById("finalScore").textContent = score;
     document.getElementById("finalTitle").textContent = "Taman Ilmu berjaya diselamatkan, " + student + "!";
     var tier = score >= 90 ? "Pakar Ukuran 🏅" : score >= 75 ? "Pereka Bentuk Taman 🌿" : score >= 60 ? "Detektif Luas 🔎" : "Penjaga Taman Pantang Menyerah 🌱";
