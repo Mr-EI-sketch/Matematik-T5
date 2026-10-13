@@ -128,9 +128,6 @@ p { margin-top: 0; }
 .mission-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 15px; }
 .mission-actions .btn { flex: 1 1 135px; }
 .result-line { font-weight: 850; color: var(--good); margin-top: 12px; }
-.team-checks { display: grid; gap: 9px; margin: 12px 0; }
-.team-checks label { display: flex; align-items: flex-start; gap: 10px; }
-.team-checks input { width: 19px; height: 19px; accent-color: var(--green); margin-top: 2px; }
 .final { padding: 21px; margin-top: 14px; }
 .final h2 { font-size: 1.5rem; }
 .final-score { font-size: 2.3rem; color: var(--green-dark); font-weight: 950; }
@@ -153,61 +150,48 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   <header class="hero">
     <div class="eyebrow">Permainan pembelajaran · 5 Inovatif</div>
     <h1>Operasi Selamatkan Taman Ilmu</h1>
-    <p>Peta taman telah rosak. Selesaikan misi luas untuk membina semula taman dan kumpulkan lencana pasukan.</p>
+    <p>Peta taman telah rosak. Selesaikan misi luas seorang diri untuk membina semula taman dan kumpulkan lencana peribadi.</p>
     <div class="pills"><span class="pill">📱 Mesra telefon</span><span class="pill">🌐 Boleh dimainkan tanpa internet</span><span class="pill">💚 Tiada aplikasi berbayar</span></div>
   </header>
 
   <section class="setup" id="setup">
-    <h2>Sedia, pasukan?</h2>
-    <p class="muted">Gunakan satu telefon bersama. Bincang langkah pengiraan sebelum memasukkan jawapan.</p>
+    <h2>Sedia, Penjaga Taman?</h2>
+    <p class="muted">Aktiviti ini dimainkan secara individu. Setiap murid gunakan telefon sendiri dan jawab semua misi berdasarkan pengiraan sendiri.</p>
     <ol class="muted">
-      <li>Isi nama pasukan dan tekan <strong>Mula misi</strong>.</li>
+      <li>Isi nama murid dan tekan <strong>Mula misi</strong>.</li>
       <li>Pilih strategi, masukkan jawapan, kemudian tekan <strong>Semak jawapan</strong>.</li>
       <li>Jika tersilap, cuba lagi atau buka petunjuk. Markah tidak ditolak.</li>
       <li>Selepas semua misi, tekan Hantar keputusan ke cikgu. Keputusan akan terisi dalam borang; tekan Hantar untuk merekodkannya.</li>
     </ol>
-    <label class="label" for="teamName">Nama pasukan</label>
-    <input class="text-input" id="teamName" maxlength="28" placeholder="Contoh: Penjaga Taman" autocomplete="off">
+    <label class="label" for="studentName">Nama murid</label>
+    <input class="text-input" id="studentName" maxlength="40" placeholder="Contoh: Aina binti Ahmad" autocomplete="name">
     <div class="start-row"><button class="btn btn-primary" id="startBtn" type="button">Mula misi →</button></div>
   </section>
 
   <section id="game" hidden>
     <div class="scorebar" aria-live="polite">
-      <div><div class="score-caption">Markah pasukan</div><div class="score-number"><span id="score">0</span><span class="score-caption"> / 100</span></div></div>
-      <div style="text-align:right"><div class="score-caption">Pasukan</div><strong id="teamDisplay"></strong></div>
+      <div><div class="score-caption">Markah individu</div><div class="score-number"><span id="score">0</span><span class="score-caption"> / 100</span></div></div>
+      <div style="text-align:right"><div class="score-caption">Murid</div><strong id="studentDisplay"></strong></div>
       <div class="progress-wrap">
-        <div class="progress-meta"><span>Kemajuan misi</span><strong id="progressLabel">0 / 5 selesai</strong></div>
-        <div class="progress-track" role="progressbar" aria-label="Kemajuan misi" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="progress-meta"><span>Kemajuan misi</span><strong id="progressLabel">0 / 6 selesai</strong></div>
+        <div class="progress-track" role="progressbar" aria-label="Kemajuan misi" aria-valuemin="0" aria-valuemax="6" aria-valuenow="0"><div class="progress-fill" id="progressFill"></div></div>
       </div>
     </div>
 
     <div class="section-title"><h2>Misi taman</h2><span class="muted">Petunjuk tidak menolak markah</span></div>
     <div class="mission-list" id="missions"></div>
 
-    <div class="section-title"><h2>Ganjaran pasukan</h2></div>
-    <section class="mission" id="teamBonus">
-      <div class="leveltag">Bonus kerjasama · 5 markah</div>
-      <h3>Pasukan yang saling membantu</h3>
-      <p class="mission-copy">Tandakan selepas pasukan menyelesaikan perkara ini bersama-sama.</p>
-      <div class="team-checks">
-        <label><input type="checkbox" class="team-check"> Kami bergilir-gilir membaca, mengira atau menyemak.</label>
-        <label><input type="checkbox" class="team-check"> Kami menerangkan strategi kepada ahli pasukan.</label>
-      </div>
-      <button class="btn btn-soft" id="teamBonusBtn" type="button">Tuntut bonus kerjasama</button>
-      <div class="field-status" id="teamStatus" aria-live="polite"></div>
-    </section>
-
     <section class="final" id="final" hidden aria-live="polite">
       <div class="eyebrow" style="color:var(--green)">Misi selesai</div>
       <h2 id="finalTitle">Taman Ilmu berjaya diselamatkan!</h2>
       <div class="final-score"><span id="finalScore">0</span><span class="score-caption"> / 100 markah</span></div>
       <p id="rewardText"></p>
-      <label class="label" for="report">Keputusan pasukan</label>
+      <label class="label" for="report">Keputusan murid</label>
       <textarea class="report" id="report" readonly></textarea>
       <div class="field-status" id="submitStatus" aria-live="polite"></div>
       <a class="btn btn-primary" id="submitResultLink" href="#" target="_blank" rel="noopener">Hantar keputusan ke cikgu</a>
       <button class="btn btn-primary" id="shareBtn" type="button">Salin keputusan</button>
-      <button class="btn btn-soft" id="resetBtn" type="button">Mula pasukan baharu</button>
+      <button class="btn btn-soft" id="resetBtn" type="button">Mula semula</button>
       <div class="field-status" id="shareStatus" aria-live="polite"></div>
     </section>
   </section>
@@ -218,9 +202,8 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
 (function () {
   "use strict";
   var score = 0;
-  var team = "";
+  var student = "";
   var completed = {};
-  var bonusClaimed = false;
   var levelData = [
     {
       id: "m1", level: "Tahap 1", title: "Pintu Taman Herba", points: 15,
@@ -278,6 +261,15 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       fields: [
         {id:"reason", label:"Pilih penerangan yang tepat", kind:"choice", points:3, expected:"partial", options:[["Tidak. Kiraan itu hanya mendapat satu segi empat tepat kecil; cara yang betul ialah tolak luas potongan daripada bentuk besar.","partial"],["Ya. Tolak ukuran sisi dahulu untuk semua bentuk L.","yes"],["Tidak. Unitnya perlu ditukar daripada m² kepada m.","unit"]]},
         {id:"answer", label:"Luas seluruh bentuk L (m²)", kind:"number", points:2, expected:68}
+      ]
+    },
+    {
+      id: "bonus", level: "Tahap 6 · Bonus Individu", title: "Ruang Santai Penjaga Taman", points: 5,
+      story: "Ruang santai terdiri daripada segi empat tepat 5 m × 3 m yang bersambung dengan bahagian 2 m × 2 m. Kedua-duanya tidak bertindih. Berapakah jumlah luas ruang santai itu?",
+      hint: "Kira luas setiap bahagian dan tambah: (5 × 3) + (2 × 2).",
+      diagram: '<svg class="diagram" viewBox="0 0 320 110" role="img" aria-label="Ruang santai gabungan: segi empat tepat 5 darab 3 meter dan 2 darab 2 meter bersambung"><rect x="24" y="17" width="190" height="75" rx="5" fill="#ccebdc" stroke="#36896f" stroke-width="3"/><rect x="214" y="42" width="76" height="50" rx="5" fill="#ffe6a6" stroke="#c28a18" stroke-width="3"/><text x="86" y="59">5 m × 3 m</text><text x="217" y="70">2 m × 2 m</text></svg>',
+      fields: [
+        {id:"answer", label:"Jumlah luas ruang santai (m²)", kind:"number", points:5, expected:19}
       ]
     }
   ];
@@ -365,7 +357,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       if (nextIndex < levelData.length) {
         document.getElementById("card-" + levelData[nextIndex].id).classList.remove("locked");
       }
-      if (id === "secret") finishGame();
+      if (id === "bonus") finishGame();
     }
   }
   function updateScore() {
@@ -373,13 +365,13 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     var doneCount = levelData.filter(function (level) {
       return level.fields.every(function (field) { return completed[level.id + "." + field.id]; });
     }).length;
-    document.getElementById("progressLabel").textContent = doneCount + " / 5 selesai";
-    document.getElementById("progressFill").style.width = (doneCount * 20) + "%";
+    document.getElementById("progressLabel").textContent = doneCount + " / " + levelData.length + " selesai";
+    document.getElementById("progressFill").style.width = (doneCount / levelData.length * 100) + "%";
     document.querySelector(".progress-track").setAttribute("aria-valuenow", String(doneCount));
     if (!document.getElementById("final").hidden) {
-      var tier = score >= 90 ? "Pakar Ukuran 🏅" : score >= 75 ? "Pereka Bentuk Taman 🌿" : score >= 60 ? "Detektif Luas 🔎" : "Pasukan Pantang Menyerah 🌱";
+      var tier = score >= 90 ? "Pakar Ukuran 🏅" : score >= 75 ? "Pereka Bentuk Taman 🌿" : score >= 60 ? "Detektif Luas 🔎" : "Penjaga Taman Pantang Menyerah 🌱";
       document.getElementById("finalScore").textContent = score;
-      document.getElementById("rewardText").textContent = "Ganjaran pasukan: " + tier + ". Setiap pembetulan membawa kemajuan—syabas kerana mencuba semua misi!";
+      document.getElementById("rewardText").textContent = "Ganjaran individu: " + tier + ". Setiap pembetulan membawa kemajuan—syabas kerana mencuba semua misi!";
       makeReport(tier);
     }
   }
@@ -387,39 +379,39 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     var final = document.getElementById("final");
     final.hidden = false;
     document.getElementById("finalScore").textContent = score;
-    document.getElementById("finalTitle").textContent = "Taman Ilmu berjaya diselamatkan, " + team + "!";
-    var tier = score >= 90 ? "Pakar Ukuran 🏅" : score >= 75 ? "Pereka Bentuk Taman 🌿" : score >= 60 ? "Detektif Luas 🔎" : "Pasukan Pantang Menyerah 🌱";
-    document.getElementById("rewardText").textContent = "Ganjaran pasukan: " + tier + ". Setiap pembetulan membawa kemajuan—syabas kerana mencuba semua misi!";
+    document.getElementById("finalTitle").textContent = "Taman Ilmu berjaya diselamatkan, " + student + "!";
+    var tier = score >= 90 ? "Pakar Ukuran 🏅" : score >= 75 ? "Pereka Bentuk Taman 🌿" : score >= 60 ? "Detektif Luas 🔎" : "Penjaga Taman Pantang Menyerah 🌱";
+    document.getElementById("rewardText").textContent = "Ganjaran individu: " + tier + ". Setiap pembetulan membawa kemajuan—syabas kerana mencuba semua misi!";
     makeReport(tier);
     submitResult(tier);
     final.scrollIntoView({behavior:"smooth", block:"start"});
   }
   function makeReport(tier) {
-    var report = team + " — Operasi Selamatkan Taman Ilmu\nMarkah: " + score + "/100\nGanjaran: " + tier + "\nMisi luas bentuk gabungan selesai.";
+    var report = student + " — Operasi Selamatkan Taman Ilmu\nMarkah: " + score + "/100\nGanjaran: " + tier + "\nMisi luas bentuk gabungan selesai.";
     document.getElementById("report").value = report;
   }
   function submitResult(tier) {
     var status = document.getElementById("submitStatus");
     var params = new URLSearchParams();
     params.set("usp", "pp_url");
-    params.set("entry.1186456325", team);
+    params.set("entry.1186456325", student);
     params.set("entry.1743751029", String(score));
     params.set("entry.2019052249", tier);
     document.getElementById("submitResultLink").href =
       "https://docs.google.com/forms/d/e/1FAIpQLSf3koPC4bsdJwHVBzvufrVoI9D1no-ZQv2gPXs98ANyhXKmsg/viewform?" + params.toString();
-    status.textContent = "Nama pasukan, markah dan ganjaran sudah diisi. Tekan butang Hantar dalam borang Google untuk merekod keputusan.";
+    status.textContent = "Nama murid, markah dan ganjaran sudah diisi. Tekan butang Hantar dalam borang Google untuk merekod keputusan.";
     status.className = "field-status good";
   }
   document.getElementById("startBtn").addEventListener("click", function () {
-    var field = document.getElementById("teamName");
-    team = field.value.trim() || "Pasukan 5 Inovatif";
-    document.getElementById("teamDisplay").textContent = team;
+    var field = document.getElementById("studentName");
+    student = field.value.trim() || "Murid 5 Inovatif";
+    document.getElementById("studentDisplay").textContent = student;
     document.getElementById("setup").hidden = true;
     document.getElementById("game").hidden = false;
     document.getElementById("card-m1").classList.remove("locked");
     document.getElementById("card-m1").scrollIntoView({behavior:"smooth", block:"start"});
   });
-  document.getElementById("teamName").addEventListener("keydown", function (event) {
+  document.getElementById("studentName").addEventListener("keydown", function (event) {
     if (event.key === "Enter") document.getElementById("startBtn").click();
   });
   document.addEventListener("click", function (event) {
@@ -431,23 +423,6 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       panel.hidden = !panel.hidden;
       hint.textContent = panel.hidden ? "Minta petunjuk" : "Tutup petunjuk";
     }
-  });
-  document.getElementById("teamBonusBtn").addEventListener("click", function () {
-    var checks = Array.from(document.querySelectorAll(".team-check"));
-    var status = document.getElementById("teamStatus");
-    if (!checks.every(function (check) { return check.checked; })) {
-      status.textContent = "Tandakan kedua-dua perkara selepas pasukan membincangkannya.";
-      status.className = "field-status try";
-      return;
-    }
-    if (!bonusClaimed) {
-      bonusClaimed = true;
-      score += 5;
-      updateScore();
-    }
-    status.textContent = "Bonus kerjasama diperoleh! +5 markah.";
-    status.className = "field-status good";
-    document.getElementById("teamBonusBtn").disabled = true;
   });
   document.getElementById("shareBtn").addEventListener("click", async function () {
     var report = document.getElementById("report");
