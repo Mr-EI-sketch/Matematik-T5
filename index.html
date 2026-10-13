@@ -205,6 +205,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       <label class="label" for="report">Keputusan pasukan</label>
       <textarea class="report" id="report" readonly></textarea>
       <div class="field-status" id="submitStatus" aria-live="polite"></div>
+      <a class="btn btn-primary" id="submitResultLink" href="#" target="_blank" rel="noopener">Hantar keputusan ke cikgu</a>
       <button class="btn btn-primary" id="shareBtn" type="button">Salin keputusan</button>
       <button class="btn btn-soft" id="resetBtn" type="button">Mula pasukan baharu</button>
       <div class="field-status" id="shareStatus" aria-live="polite"></div>
@@ -220,7 +221,6 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   var team = "";
   var completed = {};
   var bonusClaimed = false;
-  var submissionStarted = false;
   var levelData = [
     {
       id: "m1", level: "Tahap 1", title: "Pintu Taman Herba", points: 15,
@@ -399,58 +399,16 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     document.getElementById("report").value = report;
   }
   function submitResult(tier) {
-    if (submissionStarted) return;
-    submissionStarted = true;
     var status = document.getElementById("submitStatus");
-    status.textContent = "Menghantar keputusan ke rekod cikgu…";
-    status.className = "field-status";
-
-    var frame = document.createElement("iframe");
-    frame.name = "teacherResultFrame";
-    frame.title = "Penghantaran keputusan";
-    frame.style.display = "none";
-    frame.src = "about:blank";
-    var form = document.createElement("form");
-    form.method = "POST";
-    form.action = "https://docs.google.com/forms/d/e/1FAIpQLSf3koPC4bsdJwHVBzvufrVoI9D1no-ZQv2gPXs98ANyhXKmsg/formResponse";
-    form.target = frame.name;
-    form.style.display = "none";
-    [
-      ["entry.1186456325", team],
-      ["entry.1743751029", String(score)],
-      ["entry.2019052249", tier]
-    ].forEach(function (field) {
-      var input = document.createElement("input");
-      input.type = "hidden";
-      input.name = field[0];
-      input.value = field[1];
-      form.appendChild(input);
-    });
-
-    var frameReady = false;
-    var responseLoaded = false;
-    var timeoutId;
-    frame.addEventListener("load", function () {
-      if (!frameReady) {
-        frameReady = true;
-        form.submit();
-        form.remove();
-        timeoutId = window.setTimeout(function () {
-          if (!responseLoaded) {
-            status.textContent = "Penghantaran belum dapat disahkan. Jika keputusan tiada dalam rekod, tekan Salin keputusan dan hantar kepada cikgu.";
-            status.className = "field-status try";
-          }
-        }, 12000);
-        return;
-      }
-      if (responseLoaded) return;
-      responseLoaded = true;
-      if (timeoutId) window.clearTimeout(timeoutId);
-      status.textContent = "Permintaan keputusan telah dihantar ke Google Form. Cikgu boleh semak dalam Google Sheets.";
-      status.className = "field-status good";
-    });
-    document.body.appendChild(frame);
-    document.body.appendChild(form);
+    var params = new URLSearchParams();
+    params.set("usp", "pp_url");
+    params.set("entry.1186456325", team);
+    params.set("entry.1743751029", String(score));
+    params.set("entry.2019052249", tier);
+    document.getElementById("submitResultLink").href =
+      "https://docs.google.com/forms/d/e/1FAIpQLSf3koPC4bsdJwHVBzvufrVoI9D1no-ZQv2gPXs98ANyhXKmsg/viewform?" + params.toString();
+    status.textContent = "Nama pasukan, markah dan ganjaran sudah diisi. Tekan butang Hantar dalam borang Google untuk merekod keputusan.";
+    status.className = "field-status good";
   }
   document.getElementById("startBtn").addEventListener("click", function () {
     var field = document.getElementById("teamName");
