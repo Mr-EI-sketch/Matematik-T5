@@ -152,9 +152,10 @@ p { margin-top: 0; }
 }
 .toast.show { animation: toast-pop 3.6s cubic-bezier(.2,.8,.2,1) both; }
 .toast.success { background: linear-gradient(120deg, #13574d, #238c72); box-shadow: 0 12px 34px rgba(19,87,77,.34); }
- .toast.try { background: #72530d; }
+.toast.try { background: #72530d; }
 .fx-layer { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 9; }
 .confetti-piece { position: absolute; top: -18px; width: var(--piece-size); height: calc(var(--piece-size) * 1.5); border-radius: 2px; animation: confetti-fall var(--fall-time) cubic-bezier(.2,.65,.5,1) both; }
+.iframe-sink { position: fixed; width: 1px; height: 1px; inset: -10px auto auto -10px; opacity: 0; border: 0; pointer-events: none; }
 @keyframes hero-arrive { from { opacity: 0; transform: translateY(12px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes seed-bounce { 0%, 100% { transform: rotate(-5deg) translateY(0); } 50% { transform: rotate(5deg) translateY(-4px); } }
 @keyframes leaf-float { 0%, 100% { transform: translateY(0) rotate(-8deg); } 50% { transform: translateY(-10px) rotate(8deg); } }
@@ -212,7 +213,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       <li>Isi nama murid dan tekan <strong>Mula misi</strong>.</li>
       <li>Pilih strategi, masukkan jawapan, kemudian tekan <strong>Semak jawapan</strong>.</li>
       <li>Jika tersilap, cuba lagi atau buka petunjuk. Markah tidak ditolak.</li>
-      <li>Selepas semua misi, tekan Hantar keputusan ke cikgu. Keputusan akan terisi dalam borang; tekan Hantar untuk merekodkannya.</li>
+      <li>Selepas semua misi, tekan <strong>Hantar keputusan &amp; gambar kepada guru</strong>. Keputusan dan gambar ringkasan jawapan dihantar terus; murid tidak perlu mengisi atau menghantar borang berasingan.</li>
     </ol>
     <label class="label" for="studentName">Nama murid</label>
     <input class="text-input" id="studentName" maxlength="40" placeholder="Contoh: Aina binti Ahmad" autocomplete="name">
@@ -240,7 +241,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       <label class="label" for="report">Keputusan murid</label>
       <textarea class="report" id="report" readonly></textarea>
       <div class="field-status" id="submitStatus" aria-live="polite"></div>
-      <a class="btn btn-primary" id="submitResultLink" href="#" target="_blank" rel="noopener">Hantar keputusan ke cikgu</a>
+      <button class="btn btn-primary" id="sendResultBtn" type="button">Hantar keputusan & gambar kepada guru</button>
       <button class="btn btn-primary" id="shareBtn" type="button">Salin keputusan</button>
       <button class="btn btn-soft" id="resetBtn" type="button">Mula semula</button>
       <div class="field-status" id="shareStatus" aria-live="polite"></div>
@@ -256,6 +257,11 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   var student = "";
   var completed = {};
   var toastTimer = null;
+  var AUTO_SUBMIT_ENDPOINT = "https://script.google.com/macros/s/AKfycbwU4rIsvhFR0Uoj4-3CXME8TOGVts4uAR4Bhp5U62vjzObucPnCuFdszHomoj4k9Mrt/exec";
+  var submissionPending = false;
+  var submissionDone = false;
+  var activeSubmissionId = "";
+  var submissionTimeout = null;
   var levelData = [
     {
       id: "m1", level: "Tahap 1", title: "Pintu Taman Herba", points: 15,
@@ -483,7 +489,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     var tier = score >= 90 ? "Pakar Ukuran 🏅" : score >= 75 ? "Pereka Bentuk Taman 🌿" : score >= 60 ? "Detektif Luas 🔎" : "Penjaga Taman Pantang Menyerah 🌱";
     document.getElementById("rewardText").textContent = "Ganjaran individu: " + tier + ". Setiap pembetulan membawa kemajuan—syabas kerana mencuba semua misi!";
     makeReport(tier);
-    submitResult(tier);
+    document.getElementById("submitStatus").textContent = "Tekan butang sekali untuk merekod markah dan menyimpan gambar ringkasan jawapan kepada guru.";
     showToast("Taman Ilmu berjaya diselamatkan, " + student + "! 🏅", "success");
     final.scrollIntoView({behavior:"smooth", block:"start"});
   }
@@ -491,18 +497,177 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     var report = student + " — Operasi Selamatkan Taman Ilmu\nMarkah: " + score + "/100\nGanjaran: " + tier + "\nMisi luas bentuk gabungan selesai.";
     document.getElementById("report").value = report;
   }
-  function submitResult(tier) {
-    var status = document.getElementById("submitStatus");
-    var params = new URLSearchParams();
-    params.set("usp", "pp_url");
-    params.set("entry.1186456325", student);
-    params.set("entry.1743751029", String(score));
-    params.set("entry.2019052249", tier);
-    document.getElementById("submitResultLink").href =
-      "https://docs.google.com/forms/d/e/1FAIpQLSf3koPC4bsdJwHVBzvufrVoI9D1no-ZQv2gPXs98ANyhXKmsg/viewform?" + params.toString();
-    status.textContent = "Nama murid, markah dan ganjaran sudah diisi. Tekan butang Hantar dalam borang Google untuk merekod keputusan.";
-    status.className = "field-status good";
+  function collectAnswerCards() {
+    return levelData.map(function (level) {
+      return {
+        title: level.level + " — " + level.title,
+        answers: level.fields.map(function (field) {
+          var value = getFieldValue(level, field);
+          if (field.kind === "choice") {
+            var option = field.options.find(function (item) { return String(item[1]) === String(value); });
+            return field.label + ": " + (option ? option[0] : "Belum dijawab");
+          }
+          return field.label + ": " + (value === null ? "Belum dijawab" : String(value) + " m²");
+        })
+      };
+    });
   }
+  function wrapCanvasText(context, text, maxWidth) {
+    var words = String(text).split(/\s+/);
+    var lines = [];
+    var line = "";
+    words.forEach(function (word) {
+      var candidate = line ? line + " " + word : word;
+      if (line && context.measureText(candidate).width > maxWidth) {
+        lines.push(line);
+        line = word;
+      } else {
+        line = candidate;
+      }
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+  function makeResultImage(tier) {
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext("2d");
+    var width = 1200;
+    var cards = collectAnswerCards();
+    var contentWidth = width - 150;
+    context.font = "24px system-ui, sans-serif";
+    cards = cards.map(function (card) {
+      return {title: card.title, lines: card.answers.reduce(function (all, answer) {
+        return all.concat(wrapCanvasText(context, "• " + answer, contentWidth - 36));
+      }, [])};
+    });
+    var height = 390 + cards.reduce(function (total, card) { return total + 62 + card.lines.length * 36; }, 0);
+    canvas.width = width;
+    canvas.height = height;
+    context = canvas.getContext("2d");
+    context.fillStyle = "#f4f7ed";
+    context.fillRect(0, 0, width, height);
+    context.fillStyle = "#123b39";
+    context.fillRect(0, 0, width, 300);
+    context.fillStyle = "#b9e1d2";
+    context.font = "bold 22px system-ui, sans-serif";
+    context.fillText("MATEMATIK TAHUN 5 · 5 INOVATIF", 72, 55);
+    context.fillStyle = "#ffffff";
+    context.font = "bold 38px system-ui, sans-serif";
+    context.fillText("OPERASI SELAMATKAN TAMAN ILMU", 72, 112);
+    context.font = "28px system-ui, sans-serif";
+    context.fillText("Murid: " + student, 72, 165);
+    context.font = "bold 52px system-ui, sans-serif";
+    context.fillText("Markah: " + score + "/100", 72, 235);
+    context.font = "bold 24px system-ui, sans-serif";
+    context.fillText("Ganjaran: " + tier, 72, 275);
+    var y = 338;
+    cards.forEach(function (card) {
+      var cardHeight = 48 + card.lines.length * 36;
+      context.fillStyle = "#ffffff";
+      context.fillRect(55, y - 26, width - 110, cardHeight);
+      context.fillStyle = "#13574d";
+      context.font = "bold 26px system-ui, sans-serif";
+      context.fillText(card.title, 78, y + 5);
+      context.fillStyle = "#173a36";
+      context.font = "24px system-ui, sans-serif";
+      var lineY = y + 43;
+      card.lines.forEach(function (line) {
+        context.fillText(line, 84, lineY);
+        lineY += 36;
+      });
+      y += cardHeight + 20;
+    });
+    context.fillStyle = "#536c67";
+    context.font = "20px system-ui, sans-serif";
+    context.fillText("Gambar ringkasan dijana secara automatik daripada jawapan permainan.", 72, height - 28);
+    return canvas.toDataURL("image/png");
+  }
+  function setSubmissionStatus(message, good) {
+    var status = document.getElementById("submitStatus");
+    status.textContent = message;
+    status.className = "field-status " + (good ? "good" : "try");
+  }
+  function getSubmissionFrame() {
+    var frame = document.getElementById("autoSubmitFrame");
+    if (!frame) {
+      frame = document.createElement("iframe");
+      frame.id = "autoSubmitFrame";
+      frame.name = "autoSubmitFrame";
+      frame.title = "Pengesahan penghantaran keputusan";
+      frame.className = "iframe-sink";
+      frame.setAttribute("aria-hidden", "true");
+      document.body.appendChild(frame);
+    }
+    return frame;
+  }
+  function sendResult() {
+    var button = document.getElementById("sendResultBtn");
+    if (submissionPending || submissionDone) return;
+    if (!AUTO_SUBMIT_ENDPOINT) {
+      setSubmissionStatus("Penghantaran automatik belum diaktifkan. Guru perlu menyambungkan penerima rekod dahulu.", false);
+      showToast("Penghantaran automatik belum disambungkan lagi.", "try");
+      return;
+    }
+    var tier = score >= 90 ? "Pakar Ukuran 🏅" : score >= 75 ? "Pereka Bentuk Taman 🌿" : score >= 60 ? "Detektif Luas 🔎" : "Penjaga Taman Pantang Menyerah 🌱";
+    var frame = getSubmissionFrame();
+    var requestId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : "rekod-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    var fields = {
+      requestId: requestId,
+      studentName: student,
+      score: String(score),
+      reward: tier,
+      resultImage: makeResultImage(tier)
+    };
+    var form = document.createElement("form");
+    form.method = "POST";
+    form.action = AUTO_SUBMIT_ENDPOINT;
+    form.target = frame.name;
+    form.enctype = "application/x-www-form-urlencoded";
+    form.style.display = "none";
+    Object.keys(fields).forEach(function (key) {
+      var input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = fields[key];
+      form.appendChild(input);
+    });
+    activeSubmissionId = requestId;
+    submissionPending = true;
+    button.disabled = true;
+    button.textContent = "Sedang menghantar…";
+    setSubmissionStatus("Menghantar markah dan gambar ringkasan kepada guru…", true);
+    document.body.appendChild(form);
+    submissionTimeout = window.setTimeout(function () {
+      if (!submissionPending) return;
+      submissionPending = false;
+      button.disabled = false;
+      button.textContent = "Cuba hantar semula";
+      setSubmissionStatus("Belum menerima pengesahan. Periksa sambungan internet dan cuba hantar semula.", false);
+      showToast("Penghantaran belum disahkan. Cuba sekali lagi.", "try");
+    }, 30000);
+    form.submit();
+    form.remove();
+  }
+  window.addEventListener("message", function (event) {
+    var frame = document.getElementById("autoSubmitFrame");
+    var data = event.data;
+    if (!frame || event.source !== frame.contentWindow || !data || data.type !== "taman-ilmu-result" || data.requestId !== activeSubmissionId) return;
+    window.clearTimeout(submissionTimeout);
+    submissionPending = false;
+    var button = document.getElementById("sendResultBtn");
+    if (data.ok) {
+      submissionDone = true;
+      button.disabled = true;
+      button.textContent = "Berjaya dihantar ✓";
+      setSubmissionStatus("Berjaya dihantar! Markah dan gambar ringkasan jawapan sudah direkodkan untuk guru.", true);
+      showToast("Berjaya dihantar, " + student + "! ✅", "success");
+    } else {
+      button.disabled = false;
+      button.textContent = "Cuba hantar semula";
+      setSubmissionStatus(data.message || "Penghantaran gagal. Cuba semula atau maklumkan guru.", false);
+      showToast("Penghantaran gagal. Cuba sekali lagi.", "try");
+    }
+  });
   document.getElementById("startBtn").addEventListener("click", function () {
     var field = document.getElementById("studentName");
     student = field.value.trim() || "Murid 5 Inovatif";
@@ -540,6 +705,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     }
     status.className = "field-status good";
   });
+  document.getElementById("sendResultBtn").addEventListener("click", sendResult);
   document.getElementById("resetBtn").addEventListener("click", function () {
     window.location.reload();
   });
