@@ -610,7 +610,10 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
     }
     var tier = score >= 90 ? "Pakar Ukuran 🏅" : score >= 75 ? "Pereka Bentuk Taman 🌿" : score >= 60 ? "Detektif Luas 🔎" : "Penjaga Taman Pantang Menyerah 🌱";
     var frame = getSubmissionFrame();
-    var requestId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : "rekod-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    if (!activeSubmissionId) {
+      activeSubmissionId = window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : "rekod-" + Date.now() + "-" + Math.random().toString(36).slice(2);
+    }
+    var requestId = activeSubmissionId;
     var fields = {
       requestId: requestId,
       studentName: student,
@@ -631,7 +634,6 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
       input.value = fields[key];
       form.appendChild(input);
     });
-    activeSubmissionId = requestId;
     submissionPending = true;
     button.disabled = true;
     button.textContent = "Sedang menghantar…";
@@ -651,7 +653,7 @@ footer { text-align: center; color: var(--muted); font-size: .85rem; padding: 20
   window.addEventListener("message", function (event) {
     var frame = document.getElementById("autoSubmitFrame");
     var data = event.data;
-    if (!frame || event.source !== frame.contentWindow || !data || data.type !== "taman-ilmu-result" || data.requestId !== activeSubmissionId) return;
+    if (!frame || !data || data.type !== "taman-ilmu-result" || data.requestId !== activeSubmissionId) return;
     window.clearTimeout(submissionTimeout);
     submissionPending = false;
     var button = document.getElementById("sendResultBtn");
